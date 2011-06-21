@@ -5,6 +5,9 @@ This is a very simple reusable app which does one thing: shows you statistics
 about your currently running memcached instances.  There are no database models
 and not much configuration.
 
+It is a fork of Eric Florenzano's django-memcached that works with the
+CACHES settings introduced in Django 1.3.
+
 Installing django-memcached
 ----------------------------
 
