@@ -1,41 +1,32 @@
 import datetime
+from django.core.cache import cache
 
-try:
-    import memcache
-    memcache_installed = True
-except ImportError:
-    memcache_installed = False
+def get_stats():
+    stats = cache._cache.get_stats()
+    new_stats = {}
 
-def get_memcached_stats(server):
-    if not memcache_installed:
-        return {}
-    host = memcache._Host(server)
-    host.connect()
-    host.send_cmd("stats")
-    
-    stats = {}
-    
-    while True:
+    for server, server_stats in stats:
+        info = server_stats.copy()
+        new_stats[server] = info
+        for memcached_key, memcached_value in server_stats.iteritems():
+            if memcached_key == "uptime":
+                info["uptime"] = datetime.timedelta(seconds=int(memcached_value))
+            elif memcached_key == "time":
+                info["time"] = datetime.datetime.fromtimestamp(int(memcached_value))
+            else:
+                try:
+                    info[memcached_key] = int(memcached_value)
+                except ValueError:
+                    pass
+
         try:
-            stat, key, value = host.readline().split(None, 2)
-        except ValueError:
-            break
-        try:
-            # Convert to native type, if possible
-            value = int(value)
-            if key == "uptime":
-                value = datetime.timedelta(seconds=value)
-            elif key == "time":
-                value = datetime.datetime.fromtimestamp(value)
-        except ValueError:
-            pass
-        stats[key] = value
+            info["hit_rate"] = 100. * info["get_hits"] / float(info["cmd_get"])
+        except ZeroDivisionError:
+            info["hit_rate"] = info["get_hits"]
 
-    host.close_socket()
-    
-    try:
-        stats['hit_rate'] = 100 * stats['get_hits'] / stats['cmd_get']
-    except ZeroDivisionError:
-        stats['hit_rate'] = stats['get_hits']
-    
-    return stats
+        info["started_at"] = info["time"] - info["uptime"]
+
+        info["cmd_get_per_second"] = info["cmd_get"] / float(info["uptime"].seconds)
+        info["cmd_set_per_second"] = info["cmd_set"] / float(info["uptime"].seconds)
+
+    return new_stats

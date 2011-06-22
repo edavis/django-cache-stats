@@ -1,51 +1,125 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="" >
-    <head>
-        <title>Server List</title>
-        <style>
-            body { font: large sans-serif; background-color: #EEE; margin: 0; padding: 0; }
-            h1 { margin: 0px; padding: 10px; text-align: center; border-bottom: 1px solid #DDD; background-color: #FFC; }
-            table { width: 100%; border-collapse: collapse; }
-            table thead { background-color: #5B80B2; color: white; border-bottom: 1px solid #DDD; }
-            table td,table th { padding: 4px 0px 4px 0px; }
-            table tbody tr { border-bottom: 1px solid #DDD; }
-            table tbody tr.even { background-color: #F6F6F6; }
-            table th { font-size: 18px; }
-            table td { text-align: center; }
-            a { text-decoration: none; color: #7CA0C7; }
-        </style>
-    </head>
-    <body>
-        <h1>Memcached Server Stats</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Server</th>
-                    <th>Keys</th>
-                    <th>Hits</th>
-                    <th>Gets</th>
-                    <th>Hit Rate</th>
-                    <th>Traffic In</th>
-                    <th>Traffic Out</th>
-                    <th>Usage</th>
-                    <th>Uptime</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i,server,stats in statuses %}
-                    <tr class="{% cycle even,odd %}">
-                        <td><a href="{% url django_memcached.views.server_status i %}">{{ server }}</a></td>
-                        <td>{{ stats.curr_items }}</td>
-                        <td>{{ stats.get_hits }}</td>
-                        <td>{{ stats.cmd_get }}</td>
-                        <td>{{ stats.hit_rate }}%</td>
-                        <td>{{ stats.bytes_read|filesizeformat }}</td>
-                        <td>{{ stats.bytes_written|filesizeformat }}</td>
-                        <td>{{ stats.bytes|filesizeformat }}</td>
-                        <td>{{ stats.uptime }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </body>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Memcached Servers</title>
+    <style type="text/css">
+      @import url({{ STATIC_URL }}memcached/css/reset.css);
+
+      body {
+      font-size: 12px;
+      width: 480px;
+      margin: 10px auto 0;
+      }
+
+      table {
+      width: 480px;
+      border-collapse: collapse;
+      border: thin solid #666;
+      margin-bottom: 20px;
+      }
+
+      caption {
+      text-align: center;
+      padding: 4px;
+      border: thin solid #666;
+      border-bottom: 0;
+      font-weight: bold;
+      background: #EDEDED;
+      }
+
+      th, td {
+      border-bottom: thin solid #666;
+      }
+
+      td div {
+      padding-bottom: 4px;
+      font-weight: bold;
+      }
+
+      td div span {
+      font-weight: normal;
+      }
+
+      th {
+      border-right: thin solid #666;
+      width: 20%;
+      }
+
+      th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 5px;
+      }
+
+      h1 {
+      font-size: 150%;
+      margin-bottom: 10px;
+      font-weight: bold;
+      text-align: center;
+      }
+
+      .odd { background-color: #EDEDED; }
+    </style>
+  </head>
+  <body>
+    <h1>Memcached Servers</h1>
+    {% for server, stats in stats.iteritems %}
+    <table border=0 cellspacing=0>
+      <caption>{{ server }}</caption>
+
+      <tr>
+        <th>Hit Rate</th>
+        <td>{{ stats.hit_rate|floatformat:"-2" }}%</td>
+      </tr>
+
+      <tr>
+        <th>Items</th>
+        <td>
+          <div>Current: <span>{{ stats.curr_items }}</span></div>
+          <div>Total: <span>{{ stats.total_items }}</span></div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Gets</th>
+        <td>
+          <div>Hits: <span>{{ stats.get_hits }}</span></div>
+          <div>Misses: <span>{{ stats.get_misses }}</span></div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Commands</th>
+        <td>
+          <div>Get: <span>{{ stats.cmd_get }} ({{ stats.cmd_get_per_second|floatformat:2 }} per sec.)</span></div>
+          <div>Set: <span>{{ stats.cmd_set }} ({{ stats.cmd_set_per_second|floatformat:2 }} per sec.)</span></div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Network</th>
+        <td>
+          <div>Sent: <span>{{ stats.bytes_written|filesizeformat }}</span></div>
+          <div>Received: <span>{{ stats.bytes_read|filesizeformat }}</span></div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Cache Size</th>
+        <td>{{ stats.bytes|filesizeformat }}</td>
+      </tr>
+
+      <tr>
+        <th>Version</th>
+        <td>{{ stats.version }}</td>
+      </tr>
+
+      <tr>
+        <th>Started</th>
+        <td>{{ stats.started_at|date:"DATETIME_FORMAT" }} ({{ stats.started_at|timesince }} ago)</td>
+      </tr>
+
+    </table>
+    {% endfor %}
+  </body>
 </html>
