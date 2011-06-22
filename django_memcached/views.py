@@ -3,32 +3,39 @@ from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
 from django.core.exceptions import ImproperlyConfigured
-from django.core.cache import (
-    parse_backend_uri, parse_backend_conf, DEFAULT_CACHE_ALIAS)
 
 from django_memcached.util import get_memcached_stats
 from django.contrib.auth.decorators import user_passes_test
 
 def get_cache_server_list():
-    """Returns a list of active memcached servers.
+    """Returns configured memcached servers.
 
-    Compatible with both 1.2 and 1.3 style cache configuration.
+    Works with both old-style (CACHE_BACKEND) and new-style (CACHES)
+    cache configurations.
 
     """
-    # If settings.CACHES isn't defined, we're using Django <= 1.2.x
-    if getattr(settings, 'CACHES', None) is None:
-        scheme, hosts, params  = parse_backend_uri(settings.CACHE_BACKEND)
-        if not 'memcached' in scheme:
-            raise ImproperlyConfigured("Must use memcached.  Currently using '%s'" % scheme)
+    def check_memcached(engine):
+        if 'memcached' not in engine:
+            raise ImproperlyConfigured("django-memcached only works with memcached.  Currently using '%s'" % engine)
 
     # Django >= 1.3
     #
-    # Django silently converts old-style CACHE_* arguments into the new-style
-    # CACHES dictionary.  So we're safe to use this.
-    else:
+    # If somebody uses CACHE_BACKEND instead of CACHES in 1.3, it
+    # automatically converts their CACHE_BACKEND configuration to the
+    # appropriate CACHES configuration.  So we can safely use
+    # parse_backend_conf here and it'll work with both old and new styles.
+    try:
+        from django.core.cache import parse_backend_conf, DEFAULT_CACHE_ALIAS
         engine, hosts, params = parse_backend_conf(DEFAULT_CACHE_ALIAS)
-        if 'memcached' not in engine:
-            raise ImproperlyConfigured("Must use memcached.  Currently using '%s'" % engine)
+        check_memcached(engine)
+
+    # Django < 1.3
+    #
+    # No parse_backend_conf and DEFAULT_CACHE_ALIAS.  Using Django < 1.3
+    except ImportError:
+        from django.core.cache import parse_backend_uri
+        engine, hosts, params = parse_backend_uri(settings.CACHE_BACKEND)
+        check_memcached(engine)
 
     return hosts if isinstance(hosts, list) else hosts.split(';')
 
