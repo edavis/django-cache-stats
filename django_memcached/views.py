@@ -31,7 +31,7 @@ def get_cache_server_list():
 
     # Django < 1.3
     #
-    # No parse_backend_conf and DEFAULT_CACHE_ALIAS.  Using Django < 1.3
+    # No parse_backend_conf and DEFAULT_CACHE_ALIAS.
     except ImportError:
         from django.core.cache import parse_backend_uri
         engine, hosts, params = parse_backend_uri(settings.CACHE_BACKEND)
