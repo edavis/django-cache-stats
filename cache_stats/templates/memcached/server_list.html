@@ -7,12 +7,13 @@
 
       body {
       font-size: 12px;
-      width: 480px;
+      width: 960px;
       margin: 10px auto 0;
+      font-family: "Lucidia Sans", Verdana, sans-serif;
       }
 
       table {
-      width: 480px;
+      width: 960px;
       border-collapse: collapse;
       border: thin solid #666;
       margin-bottom: 20px;
@@ -25,6 +26,7 @@
       border-bottom: 0;
       font-weight: bold;
       background: #EDEDED;
+      width: 960px;
       }
 
       th, td {
@@ -81,18 +83,23 @@
       </tr>
 
       <tr>
-        <th>Gets</th>
-        <td>
-          <div>Hits: <span>{{ stats.get_hits }}</span></div>
-          <div>Misses: <span>{{ stats.get_misses }}</span></div>
-        </td>
+        <th>Cache Size</th>
+        <td>{{ stats.bytes|filesizeformat }}</td>
       </tr>
 
       <tr>
         <th>Commands</th>
         <td>
-          <div>Get: <span>{{ stats.cmd_get }} ({{ stats.cmd_get_per_second|floatformat:2 }} per sec.)</span></div>
-          <div>Set: <span>{{ stats.cmd_set }} ({{ stats.cmd_set_per_second|floatformat:2 }} per sec.)</span></div>
+          <div>Gets: <span>{{ stats.cmd_get }} ({{ stats.cmd_get_per_second|floatformat:2 }} per sec.)</span></div>
+          <div>Sets: <span>{{ stats.cmd_set }} ({{ stats.cmd_set_per_second|floatformat:2 }} per sec.)</span></div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Gets</th>
+        <td>
+          <div>Hits: <span>{{ stats.get_hits }}</span></div>
+          <div>Misses: <span>{{ stats.get_misses }}</span></div>
         </td>
       </tr>
 
@@ -105,13 +112,13 @@
       </tr>
 
       <tr>
-        <th>Cache Size</th>
-        <td>{{ stats.bytes|filesizeformat }}</td>
+        <th>Version</th>
+        <td>{{ stats.version }}</td>
       </tr>
 
       <tr>
-        <th>Version</th>
-        <td>{{ stats.version }}</td>
+        <th>PID</th>
+        <td>{{ stats.pid }}</td>
       </tr>
 
       <tr>
