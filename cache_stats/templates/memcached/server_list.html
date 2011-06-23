@@ -61,6 +61,8 @@
       }
 
       .odd { background-color: #EDEDED; }
+
+      .indent { padding-left: 15px; }
     </style>
   </head>
   <body>
@@ -91,15 +93,9 @@
         <th>Commands</th>
         <td>
           <div>Gets: <span>{{ stats.cmd_get }} ({{ stats.gets_per_second|floatformat:2 }} per sec.)</span></div>
+          <div class="indent">Hits: <span>{{ stats.get_hits }}</span></div>
+          <div class="indent">Misses: <span>{{ stats.get_misses }}</span></div>
           <div>Sets: <span>{{ stats.cmd_set }} ({{ stats.sets_per_second|floatformat:2 }} per sec.)</span></div>
-        </td>
-      </tr>
-
-      <tr>
-        <th>Gets</th>
-        <td>
-          <div>Hits: <span>{{ stats.get_hits }}</span></div>
-          <div>Misses: <span>{{ stats.get_misses }}</span></div>
         </td>
       </tr>
 
