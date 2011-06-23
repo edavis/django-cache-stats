@@ -29,7 +29,11 @@ def get_stats():
             elif v.isdigit():
                 info[k] = int(v)
 
-        info["hit_rate"] = 100.0 * info["get_hits"] / float(info["cmd_get"])
+        try:
+            info["hit_rate"] = 100.0 * info["get_hits"] / float(info["cmd_get"])
+        except ZeroDivisionError:
+            info["hit_rate"] = info["get_hits"]
+
         info["gets_per_second"] = info["cmd_get"] / float(info["uptime"].seconds)
         info["sets_per_second"] = info["cmd_set"] / float(info["uptime"].seconds)
         info["started_at"] = datetime.datetime.now() - info["uptime"]
