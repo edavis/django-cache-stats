@@ -4,8 +4,10 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.shortcuts import render
 from django.template import RequestContext
+from django.views.decorators.cache import never_cache
 from .util import get_stats
 
+@never_cache
 def server_list(request):
     context = {"stats": get_stats()}
     return render(
